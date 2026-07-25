@@ -11,10 +11,7 @@ export default function Hero({
 }) {
 	return (
 		<section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
-			{/* Fallback bakgrund tills videon finns på plats */}
 			<div className="absolute inset-0 -z-20 bg-linear-to-b from-[#241b12] via-background to-background" />
-
-			{/* Video laddas upp av Gustav via /admin och sparas i Supabase Storage */}
 			{videoUrl && (
 				<video
 					className="absolute inset-0 -z-10 h-full w-full object-cover opacity-60"
@@ -26,20 +23,18 @@ export default function Hero({
 				/>
 			)}
 
-			{/* Mörk overlay så texten alltid går att läsa, video eller ej */}
 			<div className="absolute inset-0 -z-10 bg-linear-to-b from-black/70 via-black/50 to-background" />
 
 			<div className="relative z-10 flex flex-col items-center gap-6 px-6 text-center">
 				<p className="text-sm uppercase tracking-[0.3em] text-accent">Session Zero</p>
 
-				<h1 className="text-balance font-display text-2xl leading-tight text-foreground sm:text-5xl">
-					Välkomna till den nya kampanjen
-					{/* <span className="text-accent">{campaignName}</span> */}
+				<h1 className="text-balance font-display text-4xl leading-tight text-foreground sm:text-5xl">
+					{campaignName}
 				</h1>
 
 				<Divider />
 
-				<p className="max-w-md text-3xl text-muted">{subtitle}</p>
+				<p className="text-balance font-display max-w-md text-2xl text-muted">{subtitle}</p>
 			</div>
 
 			<div

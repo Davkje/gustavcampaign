@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/dal";
-import { getSiteContent } from "@/lib/content";
+import { getSiteContent, getEditableSections } from "@/lib/content";
 import { logoutAction } from "@/app/actions/auth";
-import AdminForm from "@/components/admin/AdminForm";
+import AdminEditor from "@/components/admin/AdminEditor";
 
 export default async function AdminPage() {
 	await requireAdmin();
-	const content = await getSiteContent();
+	const [content, sections] = await Promise.all([getSiteContent(), getEditableSections()]);
 
 	return (
 		<main className="min-h-screen bg-background px-6 py-16">
@@ -24,7 +24,15 @@ export default async function AdminPage() {
 						</form>
 					</div>
 				</div>
-				<AdminForm initialContent={content} />
+
+				<AdminEditor initialContent={content} initialSections={sections} />
+
+				<Link
+					href="/"
+					className="self-center rounded border border-border px-6 py-2 text-sm text-muted transition-colors hover:border-accent hover:text-accent"
+				>
+					Till sidan
+				</Link>
 			</div>
 		</main>
 	);

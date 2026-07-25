@@ -1,40 +1,12 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export type ImagePosition = "left" | "right";
+export type ImagePosition = "left" | "right" | "top" | "bottom";
 
 export type SiteContent = {
   campaignName: string;
   subtitle: string;
   videoUrl: string | null;
-
-  continentText: string;
-  continentImageUrl: string | null;
-  continentImagePosition: ImagePosition;
-
-  countryText: string;
-  countryImageUrl: string | null;
-  countryImagePosition: ImagePosition;
-
-  regionText: string;
-  regionImageUrl: string | null;
-  regionImagePosition: ImagePosition;
-
-  worldAudioUrl: string | null;
-
-  storyText: string;
-  storyImageUrl: string | null;
-  storyImagePosition: ImagePosition;
-  storyAudioUrl: string | null;
-
-  prepText: string;
-  prepImageUrl: string | null;
-  prepImagePosition: ImagePosition;
-
-  scheduleText: string;
-  scheduleImageUrl: string | null;
-  scheduleImagePosition: ImagePosition;
-
   closingText: string;
   sessionZeroDetails: string;
 };
@@ -43,67 +15,64 @@ export const DEFAULT_CONTENT: SiteContent = {
   campaignName: "[Kampanjnamn]",
   subtitle: "En äventyrarkampanj i Dylorien",
   videoUrl: null,
-
-  continentText: "Platshållartext om kontinenten Occidens kommer här.",
-  continentImageUrl: null,
-  continentImagePosition: "right",
-
-  countryText: "Platshållartext om landet Dylorien kommer här.",
-  countryImageUrl: null,
-  countryImagePosition: "right",
-
-  regionText: "Platshållartext om regionerna kommer här.",
-  regionImageUrl: null,
-  regionImagePosition: "right",
-
-  worldAudioUrl: null,
-
-  storyText: "Platshållartext om kampanjens story kommer här.",
-  storyImageUrl: null,
-  storyImagePosition: "right",
-  storyAudioUrl: null,
-
-  prepText: "Platshållartext om vad ni bör förbereda kommer här.",
-  prepImageUrl: null,
-  prepImagePosition: "right",
-
-  scheduleText: "Platshållartext om schema och sessionstider kommer här.",
-  scheduleImageUrl: null,
-  scheduleImagePosition: "right",
-
   closingText: "Vi ses vid bordet",
   sessionZeroDetails: "Datum & plats för session zero: TBD",
 };
 
+export type PublicSubsection = {
+  id: string;
+  heading: string;
+  text: string;
+  imageUrl: string | null;
+  imagePosition: ImagePosition;
+  imageBorder: boolean;
+  audioUrl: string | null;
+};
+
+export type PublicSection = {
+  id: string;
+  heading: string;
+  subsections: PublicSubsection[];
+};
+
+export type EditableSubsection = {
+  id: string;
+  heading: string;
+  text: string;
+  imagePath: string | null;
+  imageUrl: string | null;
+  imagePosition: ImagePosition;
+  imageBorder: boolean;
+  audioPath: string | null;
+  audioUrl: string | null;
+};
+
+export type EditableSection = {
+  id: string;
+  heading: string;
+  subsections: EditableSubsection[];
+};
+
 const MEDIA_BUCKET = "media";
 
-// Server-only läsning av sidans innehåll. Faller tillbaka på platshållare
+function hasSupabaseConfig() {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SECRET_KEY
+  );
+}
+
+// Server-only läsning av hero/avslutning. Faller tillbaka på platshållare
 // om Supabase inte är konfigurerat än, eller om raden saknar värden.
 export async function getSiteContent(): Promise<SiteContent> {
-  if (
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.SUPABASE_SECRET_KEY
-  ) {
+  if (!hasSupabaseConfig()) {
     return DEFAULT_CONTENT;
   }
 
   try {
     const supabase = createAdminClient();
-    // Kolumnlistan måste skrivas som en bokstavlig strängliteral direkt här
-    // (inte en variabel) för att supabase-js ska kunna typinferera raden.
     const { data, error } = await supabase
       .from("site_content")
-      .select(
-        `campaign_name, subtitle, hero_video_path,
-         continent_text, continent_image_path, continent_image_position,
-         country_text, country_image_path, country_image_position,
-         region_text, region_image_path, region_image_position,
-         world_audio_path,
-         story_text, story_image_path, story_image_position, story_audio_path,
-         prep_text, prep_image_path, prep_image_position,
-         schedule_text, schedule_image_path, schedule_image_position,
-         closing_text, session_zero_details`
-      )
+      .select("campaign_name, subtitle, hero_video_path, closing_text, session_zero_details")
       .eq("id", 1)
       .maybeSingle();
 
@@ -111,45 +80,13 @@ export async function getSiteContent(): Promise<SiteContent> {
       return DEFAULT_CONTENT;
     }
 
-    const url = (path: string | null) =>
-      path
-        ? supabase.storage.from(MEDIA_BUCKET).getPublicUrl(path).data.publicUrl
-        : null;
-    const position = (value: string | null): ImagePosition =>
-      value === "left" ? "left" : "right";
-
     return {
       campaignName: data.campaign_name || DEFAULT_CONTENT.campaignName,
       subtitle: data.subtitle || DEFAULT_CONTENT.subtitle,
-      videoUrl: url(data.hero_video_path),
-
-      continentText: data.continent_text || DEFAULT_CONTENT.continentText,
-      continentImageUrl: url(data.continent_image_path),
-      continentImagePosition: position(data.continent_image_position),
-
-      countryText: data.country_text || DEFAULT_CONTENT.countryText,
-      countryImageUrl: url(data.country_image_path),
-      countryImagePosition: position(data.country_image_position),
-
-      regionText: data.region_text || DEFAULT_CONTENT.regionText,
-      regionImageUrl: url(data.region_image_path),
-      regionImagePosition: position(data.region_image_position),
-
-      worldAudioUrl: url(data.world_audio_path),
-
-      storyText: data.story_text || DEFAULT_CONTENT.storyText,
-      storyImageUrl: url(data.story_image_path),
-      storyImagePosition: position(data.story_image_position),
-      storyAudioUrl: url(data.story_audio_path),
-
-      prepText: data.prep_text || DEFAULT_CONTENT.prepText,
-      prepImageUrl: url(data.prep_image_path),
-      prepImagePosition: position(data.prep_image_position),
-
-      scheduleText: data.schedule_text || DEFAULT_CONTENT.scheduleText,
-      scheduleImageUrl: url(data.schedule_image_path),
-      scheduleImagePosition: position(data.schedule_image_position),
-
+      videoUrl: data.hero_video_path
+        ? supabase.storage.from(MEDIA_BUCKET).getPublicUrl(data.hero_video_path)
+            .data.publicUrl
+        : null,
       closingText: data.closing_text || DEFAULT_CONTENT.closingText,
       sessionZeroDetails:
         data.session_zero_details || DEFAULT_CONTENT.sessionZeroDetails,
@@ -157,4 +94,73 @@ export async function getSiteContent(): Promise<SiteContent> {
   } catch {
     return DEFAULT_CONTENT;
   }
+}
+
+// Server-only läsning av de anpassningsbara sektionerna/underkategorierna,
+// i den ordning Gustav sorterat dem i adminpanelen. Inkluderar både lagrings-
+// path (för admin-formuläret, som behöver skicka tillbaka oförändrade
+// path-värden) och den publika URL:en (för förhandsvisning/rendering).
+export async function getEditableSections(): Promise<EditableSection[]> {
+  if (!hasSupabaseConfig()) {
+    return [];
+  }
+
+  try {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("sections")
+      .select(
+        "id, heading, sort_order, subsections(id, heading, text, image_path, image_position, image_border, audio_path, sort_order)"
+      )
+      .order("sort_order", { ascending: true })
+      .order("sort_order", { ascending: true, referencedTable: "subsections" });
+
+    if (error || !data) {
+      return [];
+    }
+
+    const url = (path: string | null) =>
+      path
+        ? supabase.storage.from(MEDIA_BUCKET).getPublicUrl(path).data.publicUrl
+        : null;
+    const position = (value: string | null): ImagePosition =>
+      value === "left" || value === "top" || value === "bottom"
+        ? value
+        : "right";
+
+    return data.map((section) => ({
+      id: section.id,
+      heading: section.heading,
+      subsections: (section.subsections ?? []).map((sub) => ({
+        id: sub.id,
+        heading: sub.heading,
+        text: sub.text,
+        imagePath: sub.image_path,
+        imageUrl: url(sub.image_path),
+        imagePosition: position(sub.image_position),
+        imageBorder: sub.image_border,
+        audioPath: sub.audio_path,
+        audioUrl: url(sub.audio_path),
+      })),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export async function getSections(): Promise<PublicSection[]> {
+  const sections = await getEditableSections();
+  return sections.map((section) => ({
+    id: section.id,
+    heading: section.heading,
+    subsections: section.subsections.map((sub) => ({
+      id: sub.id,
+      heading: sub.heading,
+      text: sub.text,
+      imageUrl: sub.imageUrl,
+      imagePosition: sub.imagePosition,
+      imageBorder: sub.imageBorder,
+      audioUrl: sub.audioUrl,
+    })),
+  }));
 }
