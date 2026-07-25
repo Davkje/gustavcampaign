@@ -1,3 +1,5 @@
+import ReactMarkdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
 import AudioPlayer from "@/components/AudioPlayer";
 import type { ImagePosition } from "@/lib/content";
 
@@ -20,7 +22,29 @@ export default function ContentBlock({
 		<h3 className="font-display text-2xl text-foreground text-center">{heading}</h3>
 	);
 	const audioEl = audioUrl && <AudioPlayer src={audioUrl} />;
-	const paragraph = <p className="whitespace-pre-line text-lg text-muted">{text}</p>;
+	const paragraph = (
+		<ReactMarkdown
+			remarkPlugins={[remarkBreaks]}
+			components={{
+				p: ({ children }) => <p className="text-lg text-muted">{children}</p>,
+				strong: ({ children }) => (
+					<strong className="text-foreground">{children}</strong>
+				),
+				a: ({ href, children }) => (
+					<a
+						href={href}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="text-accent underline hover:text-accent-deep"
+					>
+						{children}
+					</a>
+				),
+			}}
+		>
+			{text}
+		</ReactMarkdown>
+	);
 
 	if (!imageUrl) {
 		return (

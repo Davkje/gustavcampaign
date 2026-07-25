@@ -175,6 +175,9 @@ export default function SectionsEditor({
                   placeholder="Text"
                   className={fieldClasses}
                 />
+                <p className="-mt-1 text-xs text-muted">
+                  Formatera med **fet text**, *kursiv*, och [länktext](https://exempel.se)
+                </p>
 
                 <div className="flex flex-col gap-2">
                   <label className="text-sm text-muted">
