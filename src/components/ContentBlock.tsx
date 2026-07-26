@@ -19,7 +19,7 @@ export default function ContentBlock({
 	audioUrl?: string | null;
 }) {
 	const headingEl = heading && (
-		<h3 className="font-display text-2xl text-foreground text-center">{heading}</h3>
+		<h3 className="font-display font-semibold text-2xl text-foreground text-center">{heading}</h3>
 	);
 	const audioEl = audioUrl && <AudioPlayer src={audioUrl} />;
 	const paragraph = (
@@ -27,9 +27,7 @@ export default function ContentBlock({
 			remarkPlugins={[remarkBreaks]}
 			components={{
 				p: ({ children }) => <p className="text-lg text-muted">{children}</p>,
-				strong: ({ children }) => (
-					<strong className="text-foreground">{children}</strong>
-				),
+				strong: ({ children }) => <strong className="text-foreground">{children}</strong>,
 				a: ({ href, children }) => (
 					<a
 						href={href}

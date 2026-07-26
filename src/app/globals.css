@@ -7,7 +7,7 @@
 	--muted: #a89a86;
 	--accent: #c9a227;
 	--accent-deep: #7a1f2b;
-	--border: #f2ead9;
+	--border: #b6b3aa;
 }
 
 @theme inline {
@@ -25,4 +25,14 @@
 body {
 	background: var(--background);
 	color: var(--foreground);
+}
+
+strong {
+	font-family: var(--font-display);
+	letter-spacing: 1px;
+}
+
+hr {
+	margin-block: 2rem;
+	color: var(--border);
 }
