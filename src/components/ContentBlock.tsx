@@ -23,25 +23,44 @@ export default function ContentBlock({
 	);
 	const audioEl = audioUrl && <AudioPlayer src={audioUrl} />;
 	const paragraph = (
-		<ReactMarkdown
-			remarkPlugins={[remarkBreaks]}
-			components={{
-				p: ({ children }) => <p className="text-lg text-muted">{children}</p>,
-				strong: ({ children }) => <strong className="text-foreground">{children}</strong>,
-				a: ({ href, children }) => (
-					<a
-						href={href}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="text-accent underline hover:text-accent-deep"
-					>
-						{children}
-					</a>
-				),
-			}}
-		>
-			{text}
-		</ReactMarkdown>
+		// space-y-3 wrapper: om texten (t.ex. äldre innehåll, eller en oväntad
+		// styckedelning i editorn) landar som flera separata <p>-taggar istället
+		// för en enda med radbrytningar, blir avståndet ett litet tight mellanrum
+		// istället för ett stort "nytt stycke"-hopp. Wrappern gör också att
+		// flera block här räknas som EN flex-post i de yttre gap-baserade
+		// layouterna, istället för att läcka ut som egna poster.
+		<div className="space-y-3">
+			<ReactMarkdown
+				remarkPlugins={[remarkBreaks]}
+				components={{
+					p: ({ children }) => <p className="text-lg text-muted">{children}</p>,
+					strong: ({ children }) => <strong className="text-foreground">{children}</strong>,
+					a: ({ href, children }) => (
+						<a
+							href={href}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="text-accent underline hover:text-accent-deep"
+						>
+							{children}
+						</a>
+					),
+					ul: ({ children }) => (
+						<ul className="list-disc space-y-1 pl-5 text-lg text-muted">{children}</ul>
+					),
+					ol: ({ children }) => (
+						<ol className="list-decimal space-y-1 pl-5 text-lg text-muted">{children}</ol>
+					),
+					blockquote: ({ children }) => (
+						<blockquote className="border-l-2 border-accent/40 pl-4 text-lg text-muted italic">
+							{children}
+						</blockquote>
+					),
+				}}
+			>
+				{text}
+			</ReactMarkdown>
+		</div>
 	);
 
 	if (!imageUrl) {

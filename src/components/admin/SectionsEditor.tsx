@@ -6,6 +6,21 @@ import {
   type SectionState,
 } from "@/components/admin/sectionState";
 import { fieldClasses, fileFieldClasses } from "@/components/admin/fieldStyles";
+import RichTextEditor from "@/components/admin/RichTextEditor";
+import { RiDeleteBinLine } from "@remixicon/react";
+
+function DeleteButton({ onClick, label }: { onClick: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex items-center gap-1 text-sm text-accent-deep opacity-60 transition-opacity hover:opacity-100"
+    >
+      <RiDeleteBinLine size={16} />
+      {label}
+    </button>
+  );
+}
 
 export default function SectionsEditor({
   sections,
@@ -118,13 +133,7 @@ export default function SectionsEditor({
             >
               ↓
             </button>
-            <button
-              type="button"
-              onClick={() => removeSection(sIndex)}
-              className="text-sm text-accent-deep hover:underline"
-            >
-              Ta bort sektion
-            </button>
+            <DeleteButton onClick={() => removeSection(sIndex)} label="Ta bort sektion" />
           </div>
 
           <div className="flex flex-col gap-6 border-l border-border pl-4">
@@ -157,27 +166,18 @@ export default function SectionsEditor({
                   >
                     ↓
                   </button>
-                  <button
-                    type="button"
+                  <DeleteButton
                     onClick={() => removeSubsection(sIndex, subIndex)}
-                    className="text-sm text-accent-deep hover:underline"
-                  >
-                    Ta bort
-                  </button>
+                    label="Ta bort"
+                  />
                 </div>
 
-                <textarea
+                <RichTextEditor
                   value={sub.text}
-                  onChange={(e) =>
-                    updateSubsection(sIndex, subIndex, { text: e.target.value })
+                  onChange={(markdown) =>
+                    updateSubsection(sIndex, subIndex, { text: markdown })
                   }
-                  rows={3}
-                  placeholder="Text"
-                  className={fieldClasses}
                 />
-                <p className="-mt-1 text-xs text-muted">
-                  Formatera med **fet text**, *kursiv*, och [länktext](https://exempel.se)
-                </p>
 
                 <div className="flex flex-col gap-2">
                   <label className="text-sm text-muted">
@@ -206,18 +206,15 @@ export default function SectionsEditor({
                         alt=""
                         className="max-h-32 rounded border border-border object-cover"
                       />
-                      <button
-                        type="button"
+                      <DeleteButton
                         onClick={() =>
                           updateSubsection(sIndex, subIndex, {
                             existingImagePath: null,
                             existingImageUrl: null,
                           })
                         }
-                        className="text-sm text-accent-deep hover:underline"
-                      >
-                        Ta bort bild
-                      </button>
+                        label="Ta bort bild"
+                      />
                     </div>
                   )}
                   {(sub.imageFile || sub.existingImageUrl) && (
@@ -284,18 +281,15 @@ export default function SectionsEditor({
                   {sub.existingAudioUrl && !sub.audioFile && (
                     <div className="flex items-center gap-3">
                       <audio src={sub.existingAudioUrl} controls className="flex-1" />
-                      <button
-                        type="button"
+                      <DeleteButton
                         onClick={() =>
                           updateSubsection(sIndex, subIndex, {
                             existingAudioPath: null,
                             existingAudioUrl: null,
                           })
                         }
-                        className="text-sm text-accent-deep hover:underline"
-                      >
-                        Ta bort ljud
-                      </button>
+                        label="Ta bort ljud"
+                      />
                     </div>
                   )}
                 </div>
